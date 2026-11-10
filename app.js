@@ -263,7 +263,7 @@ function buildBoard() {
   }
   const pad = $('#numpad'); pad.innerHTML = ''; numBtns = [];
   for (let d = 1; d <= 9; d++) {
-    const b = el('button', 'btn num'); b.append(String(d), el('small'));
+    const b = el('button', 'btn num'); b.append(el('span', null, String(d)), el('small'));
     b.addEventListener('click', () => input(d)); pad.appendChild(b); numBtns[d] = b;
   }
   const er = el('button', 'btn num erase', '⌫'); er.setAttribute('aria-label', 'Löschen');
@@ -295,7 +295,7 @@ function renderGame() {
   }
   const counts = new Array(10).fill(0);
   g.values.forEach((v, i) => { if (v && v === g.solution[i]) counts[v]++; });
-  for (let d = 1; d <= 9; d++) { numBtns[d].classList.toggle('done', counts[d] >= 9); numBtns[d].querySelector('small').textContent = 9 - counts[d] || ''; }
+  for (let d = 1; d <= 9; d++) { numBtns[d].classList.toggle('done', counts[d] >= 9); numBtns[d].querySelector('small').textContent = counts[d] < 9 ? `noch ${9 - counts[d]}` : 'fertig'; }
   $('#btnNotes').classList.toggle('on', notesMode);
   $('#notesLabel').textContent = notesMode ? 'Notizen an' : 'Notizen aus';
   $('#timer').classList.toggle('hidden', !s.timer);

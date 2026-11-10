@@ -142,9 +142,11 @@ html.big .board { --size: min(calc(100vw - 8px), calc(100dvh - 360px), 600px); }
 .tool.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 
 .numpad { width: 100%; max-width: 560px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-.num { position: relative; font-size: 2em; font-weight: 700; min-height: 72px; padding: 0; color: var(--accent); }
-html.big .num { font-size: 2.2em; min-height: 72px; }
-.num small { position: absolute; top: 3px; right: 7px; font-size: .38em; color: var(--muted); font-weight: 600; }
+.num { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-size: 2em; font-weight: 700; min-height: 76px; padding: 4px 0; color: var(--accent); line-height: 1; }
+html.big .num { font-size: 2.2em; min-height: 84px; }
+.num small { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+html.big .num small { font-size: 14px; }
 .num.done { opacity: .25; }
 .num.erase { font-size: 1.5em; color: var(--ink); }
 
