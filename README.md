@@ -6,10 +6,10 @@ Werbefreies Sudoku als Web-App (PWA) – läuft im Browser, lässt sich auf Andr
 - **Tagesrätsel** – jeden Tag ein neues, unter der Woche steigend schwerer (Mo/Di leicht … Fr/Sa schwer)
 - **Serie** 🔥 – Tage in Folge mit gelöstem Tagesrätsel; **Schutzschilde** 🛡️ retten die Serie bei einem verpassten Tag (alle 7 Tage gibt's ein neues)
 - **Ränge** – Anfänger → Lehrling → Geselle → **Meister** → Großmeister → … → Unsterblicher
-- **Sterne** – 3 ohne Fehler/Tipp, 2 bei höchstens 2, sonst 1; mehr Sterne = mehr Punkte
+- **Sterne** – 3 ohne Fehler, 2 bei höchstens 2 Fehlern, sonst 1; mehr Sterne = mehr Punkte
 - **Tagesziel** – 3 Rätsel am Tag geben Bonuspunkte
 - **22 Orden**, Bestzeiten, Monatskalender
-- Senioren-freundlich: große Felder und Tasten, Fehler rot, Notizen, Rückgängig, Tipp, „Extra große Schrift“
+- Senioren-freundlich: große Felder und Tasten, Fehler rot, Notizen, Rückgängig, „Extra große Schrift“
 
 ## Lokal starten
 ```bash

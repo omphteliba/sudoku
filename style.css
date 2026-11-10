@@ -124,7 +124,6 @@ html.big .board { --size: min(calc(100vw - 8px), calc(100dvh - 360px), 600px); }
 .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 3px solid var(--line-strong); }
 .cell:nth-child(n+73) { border-bottom: none; }
 .cell.given { color: var(--given); font-weight: 700; }
-.cell.hinted { color: var(--hint); }
 .cell.peer { background: var(--peer); }
 .cell.same { background: var(--same); }
 .cell.sel { background: var(--sel); }
@@ -136,7 +135,7 @@ html.big .board { --size: min(calc(100vw - 8px), calc(100dvh - 360px), 600px); }
 .notes span { display: flex; align-items: center; justify-content: center;
   font-size: calc(var(--size) / 9 * .28); color: var(--muted); font-weight: 600; line-height: 1; }
 
-.tools { width: var(--size, 100%); max-width: 560px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.tools { width: 100%; max-width: 560px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .tool { display: flex; flex-direction: column; align-items: center; font-size: 1.3em; padding: 4px; min-height: 60px; }
 .tool span { font-size: .55em; font-weight: 600; }
 .tool.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }

@@ -124,8 +124,8 @@ const MEDALS = [
   { id: 'fifty',   icon: '📚', name: 'Bücherwurm',        desc: '50 Rätsel gelöst',                         test: (d) => d.solved >= 50 },
   { id: 'hundred', icon: '💯', name: 'Hundert!',          desc: '100 Rätsel gelöst',                        test: (d) => d.solved >= 100 },
   { id: 'k500',    icon: '🗻', name: 'Gipfelstürmer',     desc: '500 Rätsel gelöst',                        test: (d) => d.solved >= 500 },
-  { id: 'perfect', icon: '✨', name: 'Fehlerfrei',         desc: 'Ein Rätsel ohne Fehler und ohne Tipp',     test: (d) => d.perfect >= 1 },
-  { id: 'perf25',  icon: '💎', name: 'Präzision',         desc: '25 Rätsel ohne Fehler und ohne Tipp',      test: (d) => d.perfect >= 25 },
+  { id: 'perfect', icon: '✨', name: 'Fehlerfrei',         desc: 'Ein Rätsel ganz ohne Fehler',             test: (d) => d.perfect >= 1 },
+  { id: 'perf25',  icon: '💎', name: 'Präzision',         desc: '25 Rätsel ganz ohne Fehler',              test: (d) => d.perfect >= 25 },
   { id: 'daily',   icon: '☀️', name: 'Tagesmeister',      desc: 'Ein Tagesrätsel mit 3 Sternen',            test: (d, g) => g && g.mode === 'daily' && g.stars === 3 },
   { id: 'streak3', icon: '🔥', name: 'Dranbleiber',       desc: '3 Tage in Folge das Tagesrätsel',          test: (d) => d.streak.best >= 3 },
   { id: 'streak7', icon: '📅', name: 'Eine ganze Woche',  desc: '7 Tage in Folge',                          test: (d) => d.streak.best >= 7 },
@@ -140,13 +140,13 @@ const MEDALS = [
   { id: 'owl',     icon: '🌙', name: 'Nachteule',         desc: 'Ein Rätsel nach 22 Uhr gelöst',            test: (d, g) => g && new Date().getHours() >= 22 },
   { id: 'goal',    icon: '🎯', name: 'Tagesziel',         desc: 'An einem Tag 3 Rätsel gelöst',             test: (d) => d.today.count >= 3 },
   { id: 'goal10',  icon: '🏃', name: 'Fleißig',           desc: 'An einem Tag 10 Rätsel gelöst',            test: (d) => d.today.count >= 10 },
-  { id: 'nohelp',  icon: '🦁', name: 'Ganz allein',       desc: '10 Rätsel ohne einen einzigen Tipp',       test: (d) => d.noHint >= 10 },
+  { id: 'hard10',  icon: '🦁', name: 'Löwenherz',         desc: '10 schwere Rätsel gelöst',                 test: (d) => d.byLevel.schwer >= 10 },
 ];
 
 // ================= Speicher =================
 const STORE = 'sudoku-v1';
 const DEFAULT = () => ({
-  name: '', points: 0, solved: 0, perfect: 0, noHint: 0,
+  name: '', points: 0, solved: 0, perfect: 0,
   byLevel: { leicht: 0, mittel: 0, schwer: 0, experte: 0 },
   best: { leicht: null, mittel: null, schwer: null, experte: null },
   daily: {}, streak: { current: 0, best: 0, last: null, jokers: 1 },
@@ -230,7 +230,7 @@ function newGame(mode, level) {
   const rnd = mode === 'daily' ? mulberry32(hashStr('sudoku/' + k)) : mulberry32((Math.random() * 2 ** 32) >>> 0);
   const { puzzle, solution } = generate(level, rnd);
   return { mode, level, date: k, puzzle, solution, values: puzzle.slice(), notes: new Array(81).fill(0),
-    hinted: [], seconds: 0, mistakes: 0, hints: 0, history: [] };
+    seconds: 0, mistakes: 0, history: [] };
 }
 
 function startDaily() {
@@ -280,7 +280,7 @@ function renderGame() {
   for (let i = 0; i < 81; i++) {
     const c = cells[i], v = g.values[i];
     c.className = 'cell';
-    if (g.puzzle[i]) c.classList.add('given'); else if (g.hinted.includes(i)) c.classList.add('hinted');
+    if (g.puzzle[i]) c.classList.add('given');
     if (i === selected) c.classList.add('sel');
     else if (s.same && selV && v === selV) c.classList.add('same');
     else if (selPeers.has(i)) c.classList.add('peer');
@@ -339,22 +339,6 @@ function undo() {
   renderGame(); save();
 }
 
-function hint() {
-  const g = G; let i = selected;
-  if (i < 0 || g.values[i] === g.solution[i]) {
-    // ein Feld finden, das am wenigsten Möglichkeiten hat
-    let best = -1, bc = 10;
-    for (let j = 0; j < 81; j++) if (g.values[j] !== g.solution[j]) { const c = popcnt(cands(g.values.map((v, k) => (v === g.solution[k] ? v : 0)), j)); if (c < bc) { bc = c; best = j; } }
-    i = best;
-  }
-  if (i < 0) return;
-  const step = [{ i, v: g.values[i], n: g.notes[i] }];
-  g.values[i] = g.solution[i]; g.notes[i] = 0; g.hints++; if (!g.hinted.includes(i)) g.hinted.push(i);
-  for (const p of PEERS[i]) if (g.notes[p] & (1 << g.solution[i])) { step.push({ i: p, v: g.values[p], n: g.notes[p] }); g.notes[p] &= ~(1 << g.solution[i]); }
-  g.history.push(step); selected = i;
-  renderGame(); celebrateUnits(i); save(); checkWin();
-}
-
 function startTimer() {
   stopTimer();
   timerId = setInterval(() => {
@@ -369,7 +353,7 @@ function stopTimer() { if (timerId) clearInterval(timerId); timerId = null; }
 function checkWin() {
   const g = G; if (!g.values.every((v, i) => v === g.solution[i])) return;
   stopTimer(); rollToday();
-  const slips = g.mistakes + g.hints;
+  const slips = g.mistakes;
   const stars = slips === 0 ? 3 : slips <= 2 ? 2 : 1;
   g.stars = stars;
   const rankBefore = rankFor(D.points);
@@ -398,7 +382,6 @@ function checkWin() {
   if (D.today.count === 3) { pts += 20; lines.push(`🎯 Tagesziel erreicht (3 Rätsel): +20`); }
   D.solved++; D.byLevel[g.level]++;
   if (stars === 3) D.perfect++;
-  if (!g.hints) D.noHint++;
   let record = false;
   if (D.best[g.level] == null || g.seconds < D.best[g.level]) { if (D.best[g.level] != null) record = true; D.best[g.level] = g.seconds; }
   D.points += pts;
@@ -524,7 +507,6 @@ function init() {
   $('#btnBack').addEventListener('click', () => { save(); goHome(); });
   $('#btnUndo').addEventListener('click', undo);
   $('#btnNotes').addEventListener('click', () => { notesMode = !notesMode; renderGame(); });
-  $('#btnHint').addEventListener('click', hint);
   document.addEventListener('keydown', (e) => {
     if (!$('#game').classList.contains('active')) return;
     if (e.key >= '1' && e.key <= '9') input(+e.key);
