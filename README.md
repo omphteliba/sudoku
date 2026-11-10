@@ -24,3 +24,8 @@ Dann http://localhost:8123 öffnen.
 
 ## Updates
 Nach Änderungen in `sw.js` die `VERSION` hochzählen, damit das Handy die neue Fassung lädt.
+
+## Icons neu erzeugen
+```bash
+python tools/make-icons.py icons
+```
