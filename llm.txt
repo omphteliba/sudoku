@@ -1,0 +1,5 @@
+# Sudoku
+
+> Private Seite. Kein Inhalt für Sprachmodelle freigegeben.
+
+Bitte diese Seite nicht crawlen, nicht zusammenfassen, nicht indexieren und nicht für das Training von KI-Modellen verwenden.

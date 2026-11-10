@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; manifest-src 'self'">
+<meta name="theme-color" content="#1f4e8c">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, noai, noimageai">
+<meta name="description" content="Sudoku ohne Werbung – mit Tagesrätsel, Rängen und Auszeichnungen.">
+<title>Sudoku</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ STARTSEITE ============ -->
+<main id="home" class="screen active">
+  <h1 id="greeting">Guten Tag!</h1>
+
+  <section class="card rank-card">
+    <div class="rank-emoji" id="rankEmoji">🌱</div>
+    <div class="rank-info">
+      <div class="rank-label">Ihr Rang</div>
+      <div class="rank-name" id="rankName">Anfänger</div>
+      <div class="bar"><div class="bar-fill" id="rankBar"></div></div>
+      <div class="rank-next" id="rankNext"></div>
+    </div>
+  </section>
+
+  <section class="row2">
+    <div class="card mini">
+      <div class="mini-big" id="streakText">🔥 0</div>
+      <div class="mini-label" id="streakLabel">Tage in Folge</div>
+    </div>
+    <div class="card mini">
+      <div class="mini-big" id="goalText">0 / 3</div>
+      <div class="mini-label">Tagesziel</div>
+    </div>
+  </section>
+
+  <button class="btn btn-daily" id="btnDaily">
+    <span class="btn-daily-title" id="dailyTitle">☀️ Tagesrätsel</span>
+    <span class="btn-daily-sub" id="dailySub"></span>
+  </button>
+
+  <button class="btn btn-continue hidden" id="btnContinue">▶ Weiterspielen</button>
+
+  <h2>Neues Rätsel</h2>
+  <div class="levels">
+    <button class="btn lvl" data-level="leicht">Leicht</button>
+    <button class="btn lvl" data-level="mittel">Mittel</button>
+    <button class="btn lvl" data-level="schwer">Schwer</button>
+    <button class="btn lvl" data-level="experte">Experte</button>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="btn nav" id="btnMedals">🏅<span>Orden</span></button>
+    <button class="btn nav" id="btnStats">📊<span>Statistik</span></button>
+    <button class="btn nav" id="btnSettings">⚙️<span>Einstellungen</span></button>
+  </nav>
+</main>
+
+<!-- ============ SPIEL ============ -->
+<main id="game" class="screen">
+  <header class="game-head">
+    <button class="btn back" id="btnBack">‹ Menü</button>
+    <div class="game-title" id="gameTitle">Mittel</div>
+    <div class="game-meta"><span id="timer">0:00</span><span id="mistakes"></span></div>
+  </header>
+
+  <div id="board" class="board" role="grid" aria-label="Sudoku-Feld"></div>
+
+  <div class="tools">
+    <button class="btn tool" id="btnUndo">↶<span>Zurück</span></button>
+    <button class="btn tool" id="btnNotes">✏️<span id="notesLabel">Notizen aus</span></button>
+    <button class="btn tool" id="btnHint">💡<span>Tipp</span></button>
+  </div>
+
+  <div class="numpad" id="numpad"></div>
+</main>
+
+<!-- ============ ORDEN ============ -->
+<main id="medals" class="screen">
+  <header class="page-head"><button class="btn back" data-home>‹ Menü</button><h1>Orden</h1></header>
+  <p class="muted" id="medalCount"></p>
+  <div class="medal-list" id="medalList"></div>
+</main>
+
+<!-- ============ STATISTIK ============ -->
+<main id="stats" class="screen">
+  <header class="page-head"><button class="btn back" data-home>‹ Menü</button><h1>Statistik</h1></header>
+  <div id="statsBody"></div>
+</main>
+
+<!-- ============ EINSTELLUNGEN ============ -->
+<main id="settings" class="screen">
+  <header class="page-head"><button class="btn back" data-home>‹ Menü</button><h1>Einstellungen</h1></header>
+  <label class="field">Wie dürfen wir Sie nennen?
+    <input id="setName" type="text" maxlength="20" placeholder="z. B. Papa" autocomplete="off">
+  </label>
+  <label class="switch"><input type="checkbox" id="setMistakes"> Fehler sofort rot zeigen</label>
+  <label class="switch"><input type="checkbox" id="setSame"> Gleiche Zahlen hervorheben</label>
+  <label class="switch"><input type="checkbox" id="setTimer"> Uhr anzeigen</label>
+  <label class="switch"><input type="checkbox" id="setSound"> Töne</label>
+  <label class="switch"><input type="checkbox" id="setBig"> Extra große Schrift</label>
+  <p class="muted small">Alle Daten bleiben nur auf diesem Handy. Keine Werbung, kein Internet nötig.</p>
+</main>
+
+<!-- ============ DIALOG ============ -->
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+<canvas id="confetti" class="confetti"></canvas>
+
+<script src="app.js"></script>
+</body>
+</html>
