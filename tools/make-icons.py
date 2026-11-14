@@ -1,10 +1,24 @@
-"""Glossy, skeuomorphic Sudoku icon in the style of early iOS game icons."""
+"""Glossy app icon in the style of early iOS game icons.
+
+Shows a close-up of one 3x3 block in the game's own look: Roboto Bold
+(the font Android uses for the game), given digits dark, own entries blue,
+the selected cell yellow – plus a gold star.
+
+Usage:  python tools/make-icons.py icons
+"""
 import sys, math
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 
 OUT = sys.argv[1]
 SS = 4  # supersampling
-FONT = 'C:/Windows/Fonts/georgiab.ttf'
+FONT = 'C:/Windows/Fonts/Roboto-Bold_2.ttf'
+
+GIVEN = (29, 37, 51, 255)     # --given
+USER = (31, 95, 191, 255)     # --user
+SEL = (255, 224, 138, 255)    # --sel
+PEER = (230, 237, 247, 255)   # --peer
+LINE = (29, 37, 51, 255)      # --line-strong
+THIN = (201, 207, 216, 255)   # --line
 
 
 def lerp(a, b, t):
@@ -35,63 +49,59 @@ def rounded_mask(size, box, radius):
 
 
 def render(size, full_bleed, safe):
-    """full_bleed: background fills square (maskable). safe: fraction of size the motif may use."""
     S = size * SS
     canvas = Image.new('RGBA', (S, S), (0, 0, 0, 0))
 
-    # ---- background: deep blue with a soft radial light ----
-    bg = radial(S // 8, S // 8, S // 16, S // 22, S // 8 * 0.95, (88, 160, 245, 255), (10, 38, 105, 255)).resize((S, S), Image.BICUBIC)
-    corner = 0 if full_bleed else int(S * 0.2237)  # iOS-like corner radius
+    # background: deep blue with soft radial light
+    bg = radial(S // 8, S // 8, S // 16, S // 22, S // 8 * 0.95,
+                (88, 160, 245, 255), (10, 38, 105, 255)).resize((S, S), Image.BICUBIC)
+    corner = 0 if full_bleed else int(S * 0.2237)
     shape = rounded_mask((S, S), [0, 0, S - 1, S - 1], corner)
     canvas.paste(bg, (0, 0), shape)
 
-    # ---- paper board with drop shadow ----
-    bw = int(S * safe * 0.80)
+    # paper tile (one 3x3 block) with drop shadow
+    bw = int(S * safe * 0.74)
     bx = (S - bw) // 2
-    by = int((S - bw) / 2 + S * 0.015)
-    br = int(bw * 0.07)
+    by = int((S - bw) / 2 + S * 0.01)
+    br = int(bw * 0.09)
     shadow = Image.new('RGBA', (S, S), (0, 0, 0, 0))
-    ImageDraw.Draw(shadow).rounded_rectangle([bx, by + S * 0.025, bx + bw, by + bw + S * 0.025], radius=br, fill=(0, 10, 40, 170))
-    shadow = shadow.filter(ImageFilter.GaussianBlur(S * 0.03))
-    canvas = Image.alpha_composite(canvas, shadow)
+    ImageDraw.Draw(shadow).rounded_rectangle(
+        [bx, by + S * 0.03, bx + bw, by + bw + S * 0.03], radius=br, fill=(0, 10, 40, 170))
+    canvas = Image.alpha_composite(canvas, shadow.filter(ImageFilter.GaussianBlur(S * 0.03)))
 
-    paper = vgrad(bw, bw, (255, 253, 244, 255), (233, 222, 192, 255))
-    pmask = rounded_mask((bw, bw), [0, 0, bw - 1, bw - 1], br)
     board = Image.new('RGBA', (bw, bw), (0, 0, 0, 0))
-    board.paste(paper, (0, 0), pmask)
+    board.paste(vgrad(bw, bw, (255, 255, 255, 255), (238, 241, 246, 255)), (0, 0),
+                rounded_mask((bw, bw), [0, 0, bw - 1, bw - 1], br))
     d = ImageDraw.Draw(board)
-    pad = int(bw * 0.075)
-    g = bw - 2 * pad
-    thin, thick = max(2, int(g * 0.008)), int(g * 0.026)
-    for k in range(0, 10):
-        x = pad + round(g * k / 9)
-        w, col = (thick, (28, 52, 98, 255)) if k % 3 == 0 else (thin, (185, 192, 205, 255))
-        if k % 3:
-            d.line([x, pad, x, pad + g], fill=col, width=w)
-            d.line([pad, x, pad + g, x], fill=col, width=w)
-    for k in range(0, 10, 3):
-        x = pad + round(g * k / 9)
-        d.line([x, pad - thick // 2, x, pad + g + thick // 2], fill=(28, 52, 98, 255), width=thick)
-        d.line([pad - thick // 2, x, pad + g + thick // 2, x], fill=(28, 52, 98, 255), width=thick)
+    cell = bw / 3
 
-    font = ImageFont.truetype(FONT, int(g / 9 * 0.95))
-    ink, blue, red = (30, 36, 52, 255), (34, 92, 190, 255), (196, 40, 40, 255)
-    digits = [(0, 0, '5', ink), (0, 4, '3', ink), (1, 7, '8', ink), (2, 2, '1', blue), (3, 5, '6', ink),
-              (4, 4, '9', red), (5, 1, '7', ink), (5, 6, '2', blue), (6, 3, '4', ink), (7, 7, '1', ink),
-              (8, 1, '3', blue), (8, 5, '8', ink), (2, 6, '4', ink), (6, 8, '6', ink)]
-    for r, c, n, col in digits:
-        cx = pad + g * (c + 0.5) / 9
-        cy = pad + g * (r + 0.53) / 9
-        d.text((cx, cy), n, fill=col, font=font, anchor='mm')
-    # thin bevel on paper edge
-    edge = Image.new('RGBA', (bw, bw), (0, 0, 0, 0))
-    ImageDraw.Draw(edge).rounded_rectangle([1, 1, bw - 2, bw - 2], radius=br, outline=(255, 255, 255, 200), width=max(2, int(bw * 0.006)))
-    board = Image.alpha_composite(board, edge)
+    # selected cell + its row/column like in the game
+    sel_r, sel_c = 1, 2
+    for k in range(3):
+        for (r, c) in [(sel_r, k), (k, sel_c)]:
+            d.rectangle([c * cell, r * cell, (c + 1) * cell, (r + 1) * cell], fill=PEER)
+    d.rectangle([sel_c * cell, sel_r * cell, (sel_c + 1) * cell, (sel_r + 1) * cell], fill=SEL)
+    # re-round the corners that the fills touched
+    board.putalpha(ImageChops.multiply(board.getchannel('A'),
+                   rounded_mask((bw, bw), [0, 0, bw - 1, bw - 1], br)))
+    d = ImageDraw.Draw(board)
+
+    thin = max(2, int(bw * 0.012))
+    for k in (1, 2):
+        x = round(cell * k)
+        d.line([x, 0, x, bw], fill=THIN, width=thin)
+        d.line([0, x, bw, x], fill=THIN, width=thin)
+    d.rounded_rectangle([0, 0, bw - 1, bw - 1], radius=br, outline=LINE, width=int(bw * 0.035))
+
+    font = ImageFont.truetype(FONT, int(cell * 0.72))
+    for r, c, n, col in [(0, 0, '5', GIVEN), (0, 2, '3', GIVEN), (1, 1, '9', GIVEN),
+                         (1, 2, '7', USER), (2, 0, '1', USER)]:
+        d.text(((c + 0.5) * cell, (r + 0.5) * cell), n, fill=col, font=font, anchor='mm')
     canvas.alpha_composite(board, (bx, by))
 
-    # ---- gold star badge (bottom right of board) ----
-    sr = bw * 0.17
-    scx, scy = bx + bw - sr * 0.55, by + bw - sr * 0.55
+    # gold star badge
+    sr = bw * 0.24
+    scx, scy = bx + bw - sr * 0.45, by + bw - sr * 0.45
     pts = []
     for k in range(10):
         a = -math.pi / 2 + k * math.pi / 5
@@ -102,8 +112,6 @@ def render(size, full_bleed, safe):
     canvas = Image.alpha_composite(canvas, star_sh.filter(ImageFilter.GaussianBlur(S * 0.012)))
     smask = Image.new('L', (S, S), 0)
     ImageDraw.Draw(smask).polygon(pts, fill=255)
-    sgrad = vgrad(S, S, (255, 236, 140, 255), (214, 140, 10, 255))
-    # gradient restricted to star's bounding box for richer shading
     top, bot = scy - sr, scy + sr
     sg = Image.new('RGBA', (1, S))
     for y in range(S):
@@ -112,27 +120,24 @@ def render(size, full_bleed, safe):
     canvas.paste(sg.resize((S, S)), (0, 0), smask)
     ImageDraw.Draw(canvas).polygon(pts, outline=(150, 90, 0, 255), width=max(2, int(S * 0.006)))
 
-    # ---- classic iOS gloss: bright arc over the top half ----
-    gloss = Image.new('RGBA', (S, S), (0, 0, 0, 0))
+    # classic iOS gloss arc over the top half
     gl = Image.new('L', (S, S), 0)
-    gd = ImageDraw.Draw(gl)
-    gd.ellipse([-S * 0.35, -S * 0.62, S * 1.35, S * 0.50], fill=255)
+    ImageDraw.Draw(gl).ellipse([-S * 0.35, -S * 0.62, S * 1.35, S * 0.50], fill=255)
     grad = Image.new('L', (1, S))
     for y in range(S):
         t = y / (S * 0.5)
-        grad.putpixel((0, y), int(max(0, 120 * (1 - t) + 18)) if t < 1 else 0)
+        grad.putpixel((0, y), int(120 * (1 - t) + 18) if t < 1 else 0)
     gl = ImageChops.multiply(gl, grad.resize((S, S)))
-    gloss.putalpha(gl)
-    gloss = Image.composite(Image.new('RGBA', (S, S), (255, 255, 255, 255)), Image.new('RGBA', (S, S), (255, 255, 255, 0)), gl)
+    gloss = Image.composite(Image.new('RGBA', (S, S), (255, 255, 255, 255)),
+                            Image.new('RGBA', (S, S), (255, 255, 255, 0)), gl)
     canvas = Image.alpha_composite(canvas, gloss)
 
-    # ---- inner rim highlight / shadow (bevel) ----
     if not full_bleed:
         rim = Image.new('RGBA', (S, S), (0, 0, 0, 0))
-        ImageDraw.Draw(rim).rounded_rectangle([2, 2, S - 3, S - 3], radius=corner, outline=(255, 255, 255, 70), width=int(S * 0.008))
+        ImageDraw.Draw(rim).rounded_rectangle([2, 2, S - 3, S - 3], radius=corner,
+                                              outline=(255, 255, 255, 70), width=int(S * 0.008))
         canvas = Image.alpha_composite(canvas, rim)
 
-    # clip everything to the icon shape
     out = Image.new('RGBA', (S, S), (0, 0, 0, 0))
     out.paste(canvas, (0, 0), shape)
     return out.resize((size, size), Image.LANCZOS)
