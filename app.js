@@ -339,6 +339,20 @@ function undo() {
   renderGame(); save();
 }
 
+// Alle eigenen Eintragungen entfernen. Zeit und Fehler bleiben (sonst ließen sich Sterne „zurückholen“).
+// Als ein Schritt in der Historie gespeichert – „Zurück“ macht das Neu-Anfangen also wieder rückgängig.
+function resetPuzzle() {
+  const g = G, step = [];
+  for (let i = 0; i < 81; i++) if (!g.puzzle[i] && (g.values[i] || g.notes[i])) { step.push({ i, v: g.values[i], n: g.notes[i] }); g.values[i] = 0; g.notes[i] = 0; }
+  if (!step.length) { flashMsg('Das Rätsel ist schon wie am Anfang'); return; }
+  g.history.push(step); selected = -1;
+  renderGame(); save(); flashMsg('Rätsel steht wieder am Anfang');
+}
+function confirmReset() {
+  modal('<div class="win-emoji">⟲</div><h2>Neu anfangen?</h2><p>Alle Ihre Zahlen und Notizen in diesem Rätsel werden entfernt.<br>Zeit und Fehler laufen weiter.</p>',
+    [{ t: 'Ja, neu anfangen', primary: true, f: resetPuzzle }, { t: 'Abbrechen' }]);
+}
+
 function startTimer() {
   stopTimer();
   timerId = setInterval(() => {
@@ -506,6 +520,7 @@ function init() {
   document.querySelectorAll('[data-home]').forEach((b) => b.addEventListener('click', goHome));
   $('#btnBack').addEventListener('click', () => { save(); goHome(); });
   $('#btnUndo').addEventListener('click', undo);
+  $('#btnReset').addEventListener('click', confirmReset);
   $('#btnNotes').addEventListener('click', () => { notesMode = !notesMode; renderGame(); });
   document.addEventListener('keydown', (e) => {
     if (!$('#game').classList.contains('active')) return;
