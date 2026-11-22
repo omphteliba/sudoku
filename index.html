@@ -60,6 +60,7 @@
     <button class="btn nav" id="btnStats">📊<span>Statistik</span></button>
     <button class="btn nav" id="btnSettings">⚙️<span>Einstellungen</span></button>
   </nav>
+  <button class="btn btn-help" id="btnHelp">❓ Hilfe &amp; Anleitung</button>
 </main>
 
 <!-- ============ SPIEL ============ -->
@@ -109,6 +110,159 @@
   <p class="muted small">Alle Daten bleiben nur auf diesem Handy. Keine Werbung, kein Internet nötig.</p>
 </main>
 
+<!-- ============ HILFE ============ -->
+<main id="help" class="screen">
+  <header class="page-head"><button class="btn back" data-home>‹ Menü</button><h1>Hilfe</h1></header>
+  <button class="btn help-link" id="btnGuide"><span class="hl-icon">📖</span><span><b>Spielanleitung</b><small>So funktioniert die App: Knöpfe, Sterne, Tagesrätsel, Ränge</small></span></button>
+  <button class="btn help-link" id="btnStrat"><span class="hl-icon">🧠</span><span><b>Lösungsstrategien</b><small>So knacken Sie auch schwere Rätsel – mit Beispielen</small></span></button>
+</main>
+
+<!-- ============ ANLEITUNG ============ -->
+<main id="guide" class="screen">
+  <header class="page-head"><button class="btn back" data-back>‹ Hilfe</button><h1>Anleitung</h1></header>
+
+  <details class="help-sec" open>
+    <summary>🎯 Das Ziel</summary>
+    <p>Füllen Sie das Feld so, dass in <b>jeder Zeile</b>, <b>jeder Spalte</b> und <b>jedem der neun 3×3-Blöcke</b> die Zahlen 1 bis 9 genau einmal vorkommen.</p>
+    <p>Die dunklen, fetten Zahlen sind vorgegeben und lassen sich nicht ändern. Jedes Rätsel hat genau eine Lösung – raten muss man nie.</p>
+  </details>
+
+  <details class="help-sec">
+    <summary>✍️ Zahlen eintragen</summary>
+    <ol>
+      <li>Tippen Sie ein leeres Feld an. Es wird <span class="chip sel">gelb</span>, seine Zeile, Spalte und sein Block werden <span class="chip peer">hellblau</span>.</li>
+      <li>Tippen Sie unten auf die passende Zahl. Ihre Zahlen erscheinen <b class="c-user">blau</b>.</li>
+    </ol>
+    <p>Unter jeder Zahlentaste steht, wie oft die Zahl noch fehlt, z.&nbsp;B. „noch 3“. Ist sie überall eingetragen, steht dort „fertig“ und die Taste wird blass.</p>
+    <p>Tippen Sie auf ein Feld mit einer Zahl, werden alle gleichen Zahlen im Feld hervorgehoben – praktisch, um zu sehen, wo eine Zahl schon steht.</p>
+  </details>
+
+  <details class="help-sec">
+    <summary>🔘 Die Knöpfe</summary>
+    <dl class="keys">
+      <dt>⌫</dt><dd><b>Löschen</b> – leert das gerade ausgewählte Feld (Zahl oder Notizen).</dd>
+      <dt>↶</dt><dd><b>Zurück</b> – macht den letzten Schritt rückgängig, egal in welchem Feld. Mehrmals tippen geht weiter zurück.</dd>
+      <dt>⟲</dt><dd><b>Neu anfangen</b> – entfernt nach einer Nachfrage alle Ihre Zahlen und Notizen. Zeit und Fehler laufen weiter. Mit „Zurück“ lässt sich auch das wieder rückgängig machen.</dd>
+      <dt>✏️</dt><dd><b>Notizen</b> – solange „Notizen an“ leuchtet, tragen Sie kleine Merkzahlen ein statt der richtigen Zahl. Nochmal tippen schaltet zurück. Setzen Sie später eine richtige Zahl, verschwinden die passenden Notizen in Zeile, Spalte und Block von selbst.</dd>
+    </dl>
+  </details>
+
+  <details class="help-sec">
+    <summary>❌ Fehler</summary>
+    <p>Eine falsche Zahl wird <b class="c-bad">rot</b> angezeigt (in den Einstellungen abschaltbar). Mit „Zurück“ oder ⌫ entfernen Sie sie wieder – als Fehler gezählt bleibt sie trotzdem.</p>
+    <p><b>Keine Fehler erlaubt</b> (Einstellungen): Hier ist das Rätsel schon beim ersten Fehler vorbei und beginnt von vorn. Dafür gibt es beim Lösen 50&nbsp;% mehr Punkte.</p>
+  </details>
+
+  <details class="help-sec">
+    <summary>☀️ Tagesrätsel &amp; Serie</summary>
+    <p>Jeden Tag gibt es ein neues Tagesrätsel. Wie in der Zeitung wird es zum Wochenende hin schwerer:</p>
+    <p class="week" id="weekPlan"></p>
+    <p>🔥 <b>Serie:</b> Wie viele Tage in Folge Sie das Tagesrätsel gelöst haben.</p>
+    <p>🛡️ <b>Schutzschild:</b> Rettet Ihre Serie, wenn Sie einmal einen Tag aussetzen. Alle 7 Tage Serie gibt es ein neues (höchstens 2).</p>
+    <p>🏆 Wer das Tagesrätsel ganz ohne Fehler löst, ist <b>„Meister des Tages“</b>.</p>
+    <p>🎯 <b>Tagesziel:</b> 3 gelöste Rätsel an einem Tag bringen Bonuspunkte.</p>
+  </details>
+
+  <details class="help-sec">
+    <summary>⭐ Sterne &amp; Punkte</summary>
+    <p>★★★ ohne Fehler · ★★ mit 1–2 Fehlern · ★ mit mehr Fehlern</p>
+    <table class="stat-table" id="ptsTable"></table>
+    <ul class="plain">
+      <li>☀️ Tagesrätsel: zusätzlich +10, plus +2 je Tag Serie (bis +20)</li>
+      <li>🎯 Tagesziel (3 Rätsel am Tag): +20</li>
+      <li>🎪 Keine Fehler erlaubt: +50&nbsp;%</li>
+    </ul>
+  </details>
+
+  <details class="help-sec">
+    <summary>👑 Ränge</summary>
+    <p>Mit Ihren Punkten steigen Sie im Rang auf. Der Balken auf der Startseite zeigt, wie weit es noch bis zum nächsten Rang ist.</p>
+    <ul class="plain ranks" id="rankList"></ul>
+  </details>
+
+  <details class="help-sec">
+    <summary>🏅 Orden &amp; 📊 Statistik</summary>
+    <p>Unter <b>Orden</b> sehen Sie alle <span id="medalTotal"></span> Auszeichnungen – auch die noch fehlenden, damit Sie wissen, was es noch zu holen gibt.</p>
+    <p>Die <b>Statistik</b> zeigt gelöste Rätsel, Bestzeiten je Stufe und einen Kalender mit Ihren Tagesrätseln.</p>
+  </details>
+
+  <details class="help-sec">
+    <summary>⚙️ Einstellungen &amp; Ihre Daten</summary>
+    <p>In den Einstellungen können Sie Ihren Namen eintragen, Töne und Uhr abschalten und eine <b>extra große Schrift</b> wählen.</p>
+    <p>Alle Spielstände bleiben nur auf diesem Handy – keine Werbung, kein Konto, kein Internet nötig.</p>
+    <p class="warn">Achtung: Wenn in Chrome die <b>Browserdaten</b> bzw. <b>Website-Daten gelöscht</b> werden, sind Punkte und Serie weg.</p>
+  </details>
+
+  <button class="btn help-link" data-goto="strategies"><span class="hl-icon">🧠</span><span><b>Weiter zu den Lösungsstrategien</b></span></button>
+</main>
+
+<!-- ============ STRATEGIEN ============ -->
+<main id="strategies" class="screen">
+  <header class="page-head"><button class="btn back" data-back>‹ Hilfe</button><h1>Strategien</h1></header>
+  <p>Sudoku ist reine Logik. Für <b>Leicht</b> und <b>Mittel</b> reichen die ersten drei Techniken. Bei <b>Schwer</b> und <b>Experte</b> helfen die weiteren.</p>
+
+  <section class="strat">
+    <h3>1. Die letzte Lücke <span class="lv">Leicht</span></h3>
+    <p>Fehlt in einer Zeile, Spalte oder einem Block nur noch <b>eine</b> Zahl, ist die Sache klar: Welche der Zahlen 1–9 fehlt noch?</p>
+    <div class="mb-slot" data-ex="fullhouse"></div>
+    <p class="cap">In der Zeile stehen 1, 3, 4, 5, 6, 7, 8, 9 – es fehlt die <b>2</b>.</p>
+  </section>
+
+  <section class="strat">
+    <h3>2. Ausschlussverfahren <span class="lv">Leicht</span></h3>
+    <p>Die wichtigste Technik überhaupt. Nehmen Sie sich <b>eine Zahl</b> und <b>einen Block</b> vor. Schauen Sie, wo diese Zahl in den Nachbar-Zeilen und -Spalten schon steht – dort kann sie im Block nicht mehr hin.</p>
+    <div class="mb-slot" data-ex="crosshatch"></div>
+    <p class="cap">Wo kommt die 5 im Block links oben hin? Die <span class="chip key">grünen</span> Fünfen sperren zwei Zeilen und zwei Spalten (<span class="chip bad">rot</span>). Es bleibt nur <b>ein</b> Feld.</p>
+    <p class="tip">💡 Gehen Sie so der Reihe nach alle Zahlen 1 bis 9 durch. Am besten beginnen Sie mit Zahlen, die schon oft im Feld stehen – auf der Taste steht dann z.&nbsp;B. „noch 2“.</p>
+  </section>
+
+  <section class="strat">
+    <h3>3. Nur eine Zahl passt <span class="lv">Mittel</span></h3>
+    <p>Nehmen Sie sich <b>ein Feld</b> vor und prüfen Sie, welche Zahlen in seiner Zeile, Spalte und seinem Block schon vorkommen. Sind es acht verschiedene, bleibt nur die neunte übrig.</p>
+    <div class="mb-slot" data-ex="nakedsingle"></div>
+    <p class="cap">Für das gelbe Feld sind 1, 2, 3, 4, 5, 7, 8 und 9 schon vergeben – es kann nur die <b>6</b> sein.</p>
+  </section>
+
+  <section class="strat">
+    <h3>4. Mit Notizen arbeiten <span class="lv">Mittel – Schwer</span></h3>
+    <p>Kommen Sie nicht weiter, schalten Sie <b>✏️ Notizen</b> ein und tragen Sie in die leeren Felder eines Blocks klein ein, welche Zahlen dort noch möglich sind. So sehen Sie auf einen Blick, was wo noch geht – und finden schneller das Feld, in das nur noch <b>eine</b> Zahl passt.</p>
+    <div class="mb-slot" data-ex="notes"></div>
+    <p class="cap">Im linken Block fehlen 2, 5 und 7. Wegen der 5, 7 und 2 rechts in den Zeilen bleiben für jedes Feld nur zwei Möglichkeiten.</p>
+    <p class="tip">💡 Notizen lohnen sich vor allem bei Schwer und Experte. Wenn Sie eine richtige Zahl eintragen, räumt die App die überflüssigen Notizen selbst weg.</p>
+  </section>
+
+  <section class="strat">
+    <h3>5. Zwillinge <span class="lv">Schwer</span></h3>
+    <p>Haben <b>zwei Felder</b> in einer Zeile (oder Spalte, oder Block) <b>genau dieselben zwei</b> Möglichkeiten, dann teilen sich diese beiden Felder die zwei Zahlen. Kein anderes Feld dieser Zeile kann sie noch bekommen.</p>
+    <div class="mb-slot" data-ex="nakedpair"></div>
+    <p class="cap">Die <span class="chip key">grünen</span> Felder können nur 2 oder 7 sein. Also fallen 2 und 7 im dritten Feld weg – dort bleibt nur die <b>4</b>. Danach ist auch das letzte Feld klar: die <b>8</b>.</p>
+  </section>
+
+  <section class="strat">
+    <h3>6. Block zeigt auf Zeile <span class="lv">Schwer</span></h3>
+    <p>Kann eine Zahl in einem Block nur noch in <b>einer einzigen Zeile</b> stehen, dann gehört sie in diesem Block dorthin. Im Rest dieser Zeile – außerhalb des Blocks – darf sie dann nicht mehr vorkommen. (Genauso mit Spalten.)</p>
+    <div class="mb-slot" data-ex="pointing"></div>
+    <p class="cap">Wegen der beiden <span class="chip key">grünen</span> Vieren kann die 4 im linken Block nur in der mittleren Zeile stehen. Darum fällt die 4 auch weiter rechts in dieser Zeile weg – dort bleibt die <b>6</b>.</p>
+  </section>
+
+  <section class="strat">
+    <h3>7. Das Rechteck („X‑Wing“) <span class="lv">Experte</span></h3>
+    <p>Kann eine Zahl in <b>zwei Zeilen</b> jeweils nur in <b>denselben zwei Spalten</b> stehen, bilden die vier Felder ein Rechteck. Die Zahl steht dann auf jeden Fall in zwei gegenüberliegenden Ecken – und damit sind beide Spalten für diese Zahl „besetzt“. Überall sonst in diesen Spalten fällt sie weg.</p>
+    <div class="mb-slot" data-ex="xwing"></div>
+    <p class="cap">Gezeigt sind nur die Notizen für die 7. In den zwei markierten Zeilen passt die 7 nur in die <span class="chip key">grünen</span> Ecken. Die <span class="chip bad">roten</span> Siebenen in denselben Spalten können gestrichen werden.</p>
+  </section>
+
+  <section class="strat">
+    <h3>Allgemeine Tipps</h3>
+    <ul class="plain">
+      <li>🔁 Arbeiten Sie reihum: erst alle Zahlen 1–9 mit dem Ausschlussverfahren, dann Feld für Feld.</li>
+      <li>👆 Tippen Sie eine Zahl im Feld an – die App zeigt alle gleichen Zahlen. So sehen Sie schnell, wo sie noch fehlt.</li>
+      <li>🧘 Festgefahren? Eine kleine Pause wirkt Wunder. Die App merkt sich den Stand.</li>
+      <li>🚫 Nicht raten! Wenn eine Zahl nicht sicher ist, lieber eine Notiz machen.</li>
+    </ul>
+  </section>
+</main>
+
 <!-- ============ DIALOG ============ -->
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
   <div class="modal-box" id="modalBox"></div>
@@ -116,5 +270,6 @@
 <canvas id="confetti" class="confetti"></canvas>
 
 <script src="app.js"></script>
+<script src="help.js"></script>
 </body>
 </html>

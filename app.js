@@ -180,14 +180,24 @@ function tone(freqs, dur = 0.12, gap = 0.09) {
 }
 
 // ================= Bildschirme =================
-function show(id, push = true) {
+// Verlauf: jede Seite merkt sich ihre Tiefe (d), damit „Menü“ immer ganz zur Startseite zurückfindet
+// und die Zurück-Taste des Handys Seite für Seite zurückgeht. replace = Seite ersetzen statt stapeln.
+function show(id, push = true, replace = false) {
   document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === id));
-  if (id !== 'home' && push) history.pushState({ s: id }, '');
+  const cur = history.state || {};
+  if (id !== 'home' && push && cur.s !== id) {
+    if (replace && cur.s) history.replaceState({ s: id, d: cur.d || 1 }, '');
+    else history.pushState({ s: id, d: (cur.d || 0) + 1 }, '');
+  }
   window.scrollTo(0, 0);
   if (id === 'home') renderHome();
 }
-window.addEventListener('popstate', () => { closeModal(); stopTimer(); show('home', false); });
-function goHome() { if (history.state && history.state.s) history.back(); else show('home', false); }
+window.addEventListener('popstate', () => {
+  closeModal(); stopTimer();
+  const s = history.state && history.state.s; // z. B. von der Anleitung zurück zur Hilfe
+  show(s && s !== 'game' && $('#' + s) ? s : 'home', false);
+});
+function goHome() { const d = history.state && history.state.d; if (d) history.go(-d); else show('home', false); }
 
 // ================= Startseite =================
 function streakAlive() {
@@ -543,6 +553,11 @@ function init() {
   $('#btnMedals').addEventListener('click', () => { renderMedals(); show('medals'); });
   $('#btnStats').addEventListener('click', () => { renderStats(); show('stats'); });
   $('#btnSettings').addEventListener('click', () => show('settings'));
+  $('#btnHelp').addEventListener('click', () => show('help'));
+  $('#btnGuide').addEventListener('click', () => show('guide'));
+  $('#btnStrat').addEventListener('click', () => show('strategies'));
+  document.querySelectorAll('[data-goto]').forEach((b) => b.addEventListener('click', () => show(b.dataset.goto, true, true)));
+  document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => history.back()));
   document.querySelectorAll('[data-home]').forEach((b) => b.addEventListener('click', goHome));
   $('#btnBack').addEventListener('click', () => { save(); goHome(); });
   $('#btnUndo').addEventListener('click', undo);
@@ -559,6 +574,7 @@ function init() {
     }
   });
   document.addEventListener('visibilitychange', () => { if (document.hidden) save(); else if ($('#home').classList.contains('active')) renderHome(); });
+  if (history.state) history.replaceState(null, ''); // nach Neuladen startet die App auf der Startseite
   renderHome();
   if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 }

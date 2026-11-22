@@ -196,3 +196,55 @@ html.big .num small { font-size: 14px; }
 
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(120px); background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 12px; font-weight: 600; transition: transform .25s; z-index: 30; max-width: calc(100vw - 32px); text-align: center; }
 .toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ---- Hilfe ---- */
+.btn-help { width: 100%; margin-top: 10px; font-weight: 700; }
+.help-link { width: 100%; display: flex; align-items: center; gap: 14px; text-align: left; margin: 10px 0; padding: 16px; }
+.help-link .hl-icon { font-size: 2em; }
+.help-link b { display: block; font-size: 1.1em; }
+.help-link small { display: block; color: var(--muted); font-size: .8em; margin-top: 2px; }
+.help-sec { background: var(--card); border-radius: 14px; margin: 10px 0; box-shadow: var(--shadow); }
+.help-sec summary { padding: 16px; font-weight: 800; font-size: 1.1em; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.help-sec summary::-webkit-details-marker { display: none; }
+.help-sec summary::after { content: '▾'; color: var(--muted); transition: transform .2s; }
+.help-sec[open] summary::after { transform: rotate(180deg); }
+.help-sec > :not(summary) { margin: 0 16px 14px; }
+.help-sec ol { padding-left: 1.3em; }
+.help-sec li { margin: 6px 0; }
+.keys { display: grid; grid-template-columns: 2.2em 1fr; gap: 10px 8px; }
+.keys dt { font-size: 1.4em; text-align: center; }
+.keys dd { margin: 0; }
+.plain { list-style: none; padding: 0; }
+.plain li { margin: 8px 0; }
+.ranks li { display: flex; align-items: center; gap: 10px; }
+.ranks .r-icon { font-size: 1.4em; width: 1.4em; text-align: center; }
+.week { font-weight: 600; }
+.warn { background: var(--bad-bg); border-radius: 10px; padding: 10px 12px; }
+.chip { border-radius: 6px; padding: 0 6px; color: var(--ink); }
+.chip.sel { background: var(--sel); } .chip.peer { background: var(--peer); }
+.chip.key { background: var(--flash); } .chip.bad { background: var(--bad-bg); }
+.c-user { color: var(--user); } .c-bad { color: var(--bad); }
+
+.strat { background: var(--card); border-radius: 14px; padding: 4px 16px 14px; margin: 14px 0; box-shadow: var(--shadow); }
+.strat h3 { font-size: 1.15em; margin: 14px 0 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.strat .lv { font-size: .65em; font-weight: 700; background: var(--peer); color: var(--accent); border-radius: 20px; padding: 2px 10px; }
+.strat .cap { color: var(--muted); font-size: .92em; }
+.strat .tip { background: var(--peer); border-radius: 10px; padding: 10px 12px; font-size: .92em; }
+
+.mb { display: grid; grid-template-columns: repeat(9, 1fr); width: 100%; max-width: 400px; margin: 12px auto;
+  border: 2px solid var(--line-strong); border-radius: 4px; overflow: hidden; background: var(--card); }
+.mb > div { aspect-ratio: 1; position: relative; display: flex; align-items: center; justify-content: center;
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  font-size: clamp(15px, 5.2vw, 24px); font-weight: 600; color: var(--user); }
+.mb .g { color: var(--given); font-weight: 800; }
+.mb .bR { border-right: 2px solid var(--line-strong); }
+.mb .bB { border-bottom: 2px solid var(--line-strong); }
+.mb .lc { border-right: none; } .mb .lr { border-bottom: none; }
+.mb .t { background: var(--sel); } .mb .k { background: var(--flash); }
+.mb .r { background: var(--peer); } .mb .x { background: var(--bad-bg); }
+.mb .nt { position: absolute; inset: 1px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+  font-size: clamp(9px, 2.9vw, 13px); font-weight: 700; color: var(--muted); }
+.mb .nt span { display: flex; align-items: center; justify-content: center; line-height: 1; }
+.mb .nt .del { color: var(--bad); text-decoration: line-through; text-decoration-thickness: 2px; }
+.mb .pn { font-size: .8em; font-weight: 700; color: var(--muted); }
+.mb .pn.del { color: var(--bad); text-decoration: line-through; text-decoration-thickness: 2px; }

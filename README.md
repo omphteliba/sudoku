@@ -10,6 +10,7 @@ Werbefreies Sudoku als Web-App (PWA) – läuft im Browser, lässt sich auf Andr
 - **Tagesziel** – 3 Rätsel am Tag geben Bonuspunkte
 - **„Keine Fehler erlaubt“** (Einstellung) – ein Fehler beendet das Rätsel, dafür 50 % mehr Punkte
 - **24 Orden**, Bestzeiten, Monatskalender
+- **Hilfe**: Spielanleitung und 7 Lösungsstrategien mit Beispielbildern
 - Senioren-freundlich: große Felder und Tasten, Fehler rot, Notizen, Rückgängig, „Extra große Schrift“
 
 ## Lokal starten
