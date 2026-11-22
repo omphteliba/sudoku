@@ -140,18 +140,20 @@ const MEDALS = [
   { id: 'owl',     icon: '🌙', name: 'Nachteule',         desc: 'Ein Rätsel nach 22 Uhr gelöst',            test: (d, g) => g && new Date().getHours() >= 22 },
   { id: 'goal',    icon: '🎯', name: 'Tagesziel',         desc: 'An einem Tag 3 Rätsel gelöst',             test: (d) => d.today.count >= 3 },
   { id: 'goal10',  icon: '🏃', name: 'Fleißig',           desc: 'An einem Tag 10 Rätsel gelöst',            test: (d) => d.today.count >= 10 },
+  { id: 'strict1', icon: '🎪', name: 'Drahtseilakt',      desc: 'Ein Rätsel mit „Keine Fehler erlaubt“ gelöst', test: (d) => d.strictWins >= 1 },
+  { id: 'strict10',icon: '🤹', name: 'Seiltänzer',        desc: '10 Rätsel mit „Keine Fehler erlaubt“ gelöst',  test: (d) => d.strictWins >= 10 },
   { id: 'hard10',  icon: '🦁', name: 'Löwenherz',         desc: '10 schwere Rätsel gelöst',                 test: (d) => d.byLevel.schwer >= 10 },
 ];
 
 // ================= Speicher =================
 const STORE = 'sudoku-v1';
 const DEFAULT = () => ({
-  name: '', points: 0, solved: 0, perfect: 0,
+  name: '', points: 0, solved: 0, perfect: 0, strictWins: 0,
   byLevel: { leicht: 0, mittel: 0, schwer: 0, experte: 0 },
   best: { leicht: null, mittel: null, schwer: null, experte: null },
   daily: {}, streak: { current: 0, best: 0, last: null, jokers: 1 },
   today: { date: dayKey(), count: 0 }, medals: {},
-  settings: { mistakes: true, same: true, timer: true, sound: true, big: false },
+  settings: { mistakes: true, same: true, timer: true, sound: true, big: false, strict: false },
   games: { daily: null, free: null },
 });
 let D;
@@ -230,7 +232,7 @@ function newGame(mode, level) {
   const rnd = mode === 'daily' ? mulberry32(hashStr('sudoku/' + k)) : mulberry32((Math.random() * 2 ** 32) >>> 0);
   const { puzzle, solution } = generate(level, rnd);
   return { mode, level, date: k, puzzle, solution, values: puzzle.slice(), notes: new Array(81).fill(0),
-    seconds: 0, mistakes: 0, history: [] };
+    seconds: 0, mistakes: 0, history: [], strict: D.settings.strict };
 }
 
 function startDaily() {
@@ -300,13 +302,14 @@ function renderGame() {
   $('#notesLabel').textContent = notesMode ? 'Notizen an' : 'Notizen aus';
   $('#timer').classList.toggle('hidden', !s.timer);
   $('#timer').textContent = fmtTime(g.seconds);
-  $('#mistakes').textContent = g.mistakes ? `Fehler: ${g.mistakes}` : '';
+  $('#mistakes').textContent = g.mistakes ? `Fehler: ${g.mistakes}` : s.strict ? 'Kein Fehler erlaubt' : '';
 }
 
 function input(d) {
   const g = G, i = selected;
   if (i < 0) { flashMsg('Bitte zuerst ein Feld antippen'); return; }
   if (g.puzzle[i] || (g.values[i] && g.values[i] === g.solution[i] && D.settings.mistakes)) return; // fest
+  if (!D.settings.strict) g.strict = false; // Bonus nur, wenn das ganze Rätsel ohne Fehler-Erlaubnis gespielt wurde
   const step = [];
   const remember = (j) => step.push({ i: j, v: g.values[j], n: g.notes[j] });
 
@@ -319,10 +322,31 @@ function input(d) {
       for (const p of PEERS[i]) if (g.notes[p] & (1 << d)) { remember(p); g.notes[p] &= ~(1 << d); }
       tone([660], 0.08);
       celebrateUnits(i);
-    } else { g.mistakes++; if (D.settings.mistakes) tone([220], 0.18); }
+    } else { g.mistakes++; if (D.settings.mistakes || D.settings.strict) tone([220], 0.18); }
   }
   g.history.push(step); if (g.history.length > 300) g.history.shift();
+  if (D.settings.strict && g.mistakes) { selected = i; renderGame(); cells[i].classList.add('error'); lose(); return; }
   renderGame(); save(); checkWin();
+}
+
+// „Keine Fehler erlaubt“: Rätsel verloren – es startet wieder ganz von vorn (inkl. Zeit und Fehler).
+function restartFresh(render = true) {
+  const g = G;
+  g.values = g.puzzle.slice(); g.notes = new Array(81).fill(0); g.history = [];
+  g.mistakes = 0; g.seconds = 0; g.strict = D.settings.strict;
+  save();
+  if (render) { selected = -1; renderGame(); }
+}
+function lose() {
+  const g = G, right = g.solution[selected];
+  restartFresh(false); // gespeichert ist schon der Neustart; die falsche Zahl bleibt sichtbar, bis der Dialog zu ist
+  setTimeout(() => {
+    tone([392, 330, 262], 0.25, 0.15);
+    const btns = [{ t: 'Nochmal von vorn', primary: true, f: () => restartFresh() }];
+    if (g.mode === 'free') btns.push({ t: 'Neues Rätsel', f: () => { D.games.free = newGame('free', g.level); openGame(D.games.free); } });
+    btns.push({ t: 'Zum Menü', f: () => { restartFresh(); goHome(); } });
+    modal(`<div class="win-emoji">🙈</div><h2>Leider ein Fehler</h2><p>Dort gehörte eine <b>${right}</b> hin.<br>Bei „Keine Fehler erlaubt“ ist das Rätsel damit vorbei.</p><p class="muted small">Sie können es gleich noch einmal von vorn versuchen.</p>`, btns);
+  }, 700);
 }
 
 function celebrateUnits(i) {
@@ -374,6 +398,8 @@ function checkWin() {
   const lines = [];
   let pts = Math.round(LEVELS[g.level].points * [0, 1, 1.5, 2][stars]);
   lines.push(`${LEVELS[g.level].name} mit ${stars} ${stars === 1 ? 'Stern' : 'Sternen'}: +${pts}`);
+  const strictWin = g.strict && D.settings.strict && !g.mistakes;
+  if (strictWin) { const b = Math.round(pts / 2); pts += b; D.strictWins++; lines.push(`🎪 Ohne Fehler-Erlaubnis: +${b}`); }
 
   if (g.mode === 'daily') {
     const k = g.date, s = D.streak;
@@ -499,7 +525,7 @@ function renderStats() {
 // ================= Einstellungen =================
 function applySettings() { document.documentElement.classList.toggle('big', D.settings.big); }
 function bindSettings() {
-  const map = { setMistakes: 'mistakes', setSame: 'same', setTimer: 'timer', setSound: 'sound', setBig: 'big' };
+  const map = { setStrict: 'strict', setMistakes: 'mistakes', setSame: 'same', setTimer: 'timer', setSound: 'sound', setBig: 'big' };
   Object.entries(map).forEach(([id, key]) => {
     const inp = $('#' + id); inp.checked = D.settings[key];
     inp.addEventListener('change', () => { D.settings[key] = inp.checked; applySettings(); save(); });

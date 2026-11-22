@@ -8,7 +8,8 @@ Werbefreies Sudoku als Web-App (PWA) – läuft im Browser, lässt sich auf Andr
 - **Ränge** – Anfänger → Lehrling → Geselle → **Meister** → Großmeister → … → Unsterblicher
 - **Sterne** – 3 ohne Fehler, 2 bei höchstens 2 Fehlern, sonst 1; mehr Sterne = mehr Punkte
 - **Tagesziel** – 3 Rätsel am Tag geben Bonuspunkte
-- **22 Orden**, Bestzeiten, Monatskalender
+- **„Keine Fehler erlaubt“** (Einstellung) – ein Fehler beendet das Rätsel, dafür 50 % mehr Punkte
+- **24 Orden**, Bestzeiten, Monatskalender
 - Senioren-freundlich: große Felder und Tasten, Fehler rot, Notizen, Rückgängig, „Extra große Schrift“
 
 ## Lokal starten
